@@ -9,7 +9,7 @@ export default function ConnectWallet() {
   }
 
   return (
-    <div justifyContent="center" alignItems="center" h="100vh">
+    <div>
       <button
         disabled={connecting}
         onClick={() => connect()}

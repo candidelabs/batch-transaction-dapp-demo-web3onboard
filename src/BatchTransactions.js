@@ -5,7 +5,7 @@ import { useConnectWallet } from "@web3-onboard/react";
 
 const BatchTransactions = () => {
   const [{ wallet }] = useConnectWallet();
-  const [txHash, setTxHash] = useState();
+  const [userOpHash, setuserOpHash] = useState();
   const [error, setError] = useState("");
   const [status, setStatus] = useState();
 
@@ -38,23 +38,25 @@ const BatchTransactions = () => {
     ];
     console.log(calls);
     try {
-      const txHash = await wallet.provider.request({
+      const userOpHash = await wallet.provider.request({
         method: "wallet_sendFunctionCallBundle",
         params: calls,
       });
-      setTxHash(txHash);
+      if (userOpHash && userOpHash.startsWith("0x")) {
+        setuserOpHash(userOpHash);
+      }
     } catch (error) {
       setError(error);
     }
   };
 
   // function to ask the wallet to return the bundle status
-  const getBundleStatus = async (txHash) => {
+  const getBundleStatus = async (userOpHash) => {
     if (!wallet?.provider) return;
     try {
       const status = await wallet.provider.request({
         method: "wallet_getBundleStatus",
-        params: [txHash],
+        params: [userOpHash],
       });
       if (status) {
         const response = JSON.parse(status).calls[0].status;
@@ -66,12 +68,12 @@ const BatchTransactions = () => {
   };
 
   // function to delegate showing the bundle status to the wallet
-  const showBundleStatusInWallet = async (txHash) => {
+  const showBundleStatusInWallet = async (userOpHash) => {
     if (!wallet?.provider) return;
     try {
       const status = await wallet.provider.request({
         method: "wallet_showBundleStatus",
-        params: [txHash],
+        params: [userOpHash],
       });
       if (status) {
       }
@@ -94,8 +96,8 @@ const BatchTransactions = () => {
             <br />
             <br />
             <button
-              onClick={() => getBundleStatus(txHash)}
-              disabled={!txHash}
+              onClick={() => getBundleStatus(userOpHash)}
+              disabled={!userOpHash}
             >
               Check Bundle Status
             </button>
@@ -103,8 +105,8 @@ const BatchTransactions = () => {
             <br />
             {status !== undefined ? <p>Status: {status}</p> : null}
             <button
-              onClick={() => showBundleStatusInWallet(txHash)}
-              disabled={!txHash}
+              onClick={() => showBundleStatusInWallet(userOpHash)}
+              disabled={!userOpHash}
             >
               Show Status in Wallet
             </button>
